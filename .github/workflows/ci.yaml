@@ -1,9 +1,10 @@
-name: Java CI
+name: Java CI with Security Scans
 
 on: [push, pull_request]
 
 jobs:
-  test:
+
+  maven-test:
     runs-on: ubuntu-latest
     name: Test with Maven (JDK 17)
 
@@ -26,13 +27,27 @@ jobs:
       - name: Run tests
         run: ./mvnw test -B -V --no-transfer-progress -D"license.skip=true"
 
-      - name: Run Checkov (IaC security scan)
+  checkov-scan:
+    runs-on: ubuntu-latest
+    name: Checkov Security Scan
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Checkov
         uses: bridgecrewio/checkov-action@master
         with:
           directory: .
           output_format: cli
 
-      - name: Run Trivy (Filesystem scan)
+  trivy-scan:
+    runs-on: ubuntu-latest
+    name: Trivy Filesystem Scan
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Trivy
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
